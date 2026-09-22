@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revenue model - Cirri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js" crossorigin></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+<style>
+:root{
+  --deep:#001628; --ink:#0d2236; --ink-2:#2c4a60; --ink-3:#5f7a8e;
+  --accent:#8dd2d1; --accent-700:#2b8a89; --accent-100:#e8f5f5;
+  --gold:#f5c518; --ghost:#f2f6fa; --band:#eef2f6; --band-2:#e4eaf0; --faint:#f6f9fb;
+  --line:#d9e1e8; --line-2:#c7d2dc; --panel:#fff;
+  --red:#d64545; --amber:#e0a100; --green:#2f9e63;
+  --font:'Source Sans 3','Source Sans Pro',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.4}
+button,input,select{font-family:inherit;font-size:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent-700);outline-offset:1px}
+.num-in:focus-visible{outline:none}
+svg{display:block}
+
+/* top bar */
+.tb{position:sticky;top:0;z-index:20;height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 20px}
+.tb-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;color:var(--deep);letter-spacing:-.01em}
+.tb-brand .mark{width:26px;height:26px}
+.tb-tabs{display:flex;align-items:center;gap:4px;height:100%;margin-left:6px}
+.tb-tab{height:100%;display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:13.5px;color:var(--ink-2);border:0;background:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tb-tab.on{color:var(--deep);border-bottom-color:var(--deep)}
+.tb-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.pill-s{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;background:var(--ghost);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--ink-2);letter-spacing:.04em;text-transform:uppercase}
+.pill-s.demo{background:#efe9fb;border-color:#d9cdf5;color:#5b3fa8}
+
+/* page */
+.page{padding:18px 20px 60px;max-width:1900px;margin:0 auto}
+.ph{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:22px;font-weight:800;color:var(--deep);margin:0;display:flex;align-items:center;gap:8px;letter-spacing:-.01em}
+.ph-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr)}.aside{position:static!important;max-height:none!important}.aside::after{display:none}}
+
+/* assumptions panel */
+.aside{position:sticky;top:68px;max-height:calc(100vh - 84px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 10px 14px}
+.aside::-webkit-scrollbar{width:8px}.aside::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:8px}
+.aside::after{content:'';display:block;position:sticky;bottom:-14px;height:26px;margin:-12px -10px -14px;background:linear-gradient(rgba(255,255,255,0),#fff 70%);pointer-events:none;border-radius:0 0 10px 10px}
+.section-title{display:flex;align-items:center;gap:6px;background:var(--band);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);margin:12px 0 4px}
+.section-title:first-child{margin-top:0}
+.section-title .grow{flex:1}
+.spread{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.spread .section-title{margin:0;background:none;padding:0}
+.band{background:var(--band);border-radius:8px;padding:6px 10px;margin:12px 0 4px}
+.band.strong{background:var(--band-2);border-bottom:2px solid var(--line-2);border-radius:8px 8px 0 0}
+.srow{display:grid;grid-template-columns:minmax(0,1fr) 150px;align-items:center;gap:10px;padding:7px 8px;border-bottom:1px solid var(--faint)}
+.srow:last-child{border-bottom:0}
+.srow.wide{grid-template-columns:1fr}
+.srow .lab{font-size:13px;font-weight:600;color:var(--ink);display:flex;align-items:center;gap:5px;min-width:0}
+.srow .lab span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .ctl{display:flex;justify-content:flex-end;align-items:center;gap:6px;min-width:0}
+.after{font-size:12px;color:var(--ink-3);font-weight:600;white-space:nowrap}
+.klabel{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+
+/* inputs */
+.inp{height:30px;border:1px solid var(--line-2);border-radius:7px;padding:0 9px;background:#fff;font-size:13px;color:var(--ink);width:100%;min-width:0}
+.inp:focus{border-color:var(--accent-700);box-shadow:0 0 0 3px var(--accent-100);outline:none}
+select.inp{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%232c4a60' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px}
+.num{display:flex;align-items:center;height:30px;border:1px solid var(--line-2);border-radius:7px;background:#fff;padding:0 8px;gap:4px;width:100%;min-width:0}
+.num:focus-within{border-color:var(--accent-700);box-shadow:0 0 0 3px var(--accent-100)}
+.num .pre,.num .suf{font-size:12px;font-weight:700;color:var(--ink-3);white-space:nowrap}
+.num-in{border:0;background:none;padding:0;min-width:0;width:100%;text-align:right;font-size:13px;font-variant-numeric:tabular-nums;color:var(--ink)}
+.num.w-sm{width:78px}.num.w-md{width:110px}
+.ctl .num.w-sm{margin-left:auto}
+.ramp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;padding:4px 8px 6px}
+.ramp-cell{display:flex;flex-direction:column;gap:3px}
+.ramp-cell .k{font-size:10.5px;font-weight:700;color:var(--ink-3);letter-spacing:.04em;text-transform:uppercase}
+.ramp-then{display:flex;align-items:flex-end;padding-bottom:6px;font-size:12px;font-weight:600;color:var(--ink-3);white-space:nowrap}
+.ocost{display:grid;grid-template-columns:minmax(0,1fr) 26px;grid-template-areas:'name x' 'basis basis';gap:5px 6px;align-items:center;padding:7px 8px;border-bottom:1px solid var(--faint)}
+.ocost .nm{grid-area:name}.ocost .xbtn{grid-area:x}.ocost .bs{grid-area:basis;display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:6px}
+.ocost .inp{padding:0 8px}
+.xbtn{width:26px;height:26px;border-radius:6px;border:1px solid transparent;background:none;display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.xbtn:hover{background:var(--ghost);color:var(--red);border-color:var(--line)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);background:#fff;color:var(--ink);font-weight:700;font-size:13px;white-space:nowrap}
+.btn:hover{background:var(--ghost)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--deep)}
+.btn.primary:hover{background:#7dc8c7}
+.btn.secondary{background:var(--deep);border-color:var(--deep);color:#fff}
+.btn.secondary:hover{background:#0a2a45}
+.btn.danger{color:var(--red);border-color:#ecc2c2}
+.btn.danger:hover{background:#fbeeee}
+.btn.sm{height:26px;padding:0 9px;font-size:12px;border-radius:6px}
+.btn:disabled{opacity:.5;cursor:default}
+.seg{display:inline-flex;background:var(--ghost);border:1px solid var(--line);border-radius:8px;padding:2px;gap:2px}
+.seg button{border:0;background:none;padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+.seg button.on{background:#fff;color:var(--deep);box-shadow:0 1px 2px rgba(0,22,40,.12)}
+.seg.sm button{padding:3px 9px;font-size:12px}
+
+/* hints and tooltips */
+.fhint,.hhint{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;color:var(--ink-3);cursor:help;flex:none}
+.fhint:hover,.hhint:hover{color:var(--accent-700)}
+.hhint{width:18px;height:18px}
+#tip{position:fixed;z-index:1000;max-width:280px;background:var(--deep);color:#fff;font-size:12.5px;line-height:1.4;font-weight:400;padding:8px 10px;border-radius:7px;box-shadow:0 6px 18px rgba(0,22,40,.25);pointer-events:none;display:none}
+
+/* results */
+.tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1500px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px 11px;min-width:0}
+.stat .n{font-size:24px;font-weight:800;color:var(--deep);letter-spacing:-.01em;font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stat .n .u{font-size:14px;font-weight:700;color:var(--ink-2);margin-left:3px}
+.stat .l{display:flex;align-items:center;gap:5px;margin-top:6px}
+.stat .l span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fs{margin-top:12px;background:var(--ghost);border:1px solid var(--line);border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:8px 20px;flex-wrap:wrap}
+.fs .fs-l{display:flex;align-items:center;gap:5px}
+.fs .fs-i{display:flex;align-items:baseline;gap:6px;white-space:nowrap}
+.fs .fs-i b{font-size:15px;font-weight:800;color:var(--deep);font-variant-numeric:tabular-nums}
+.fs .fs-i span{font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:1250px){.cards{grid-template-columns:1fr}}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px 12px;min-width:0}
+.card.full{grid-column:1/-1}
+.card .spread{background:var(--band);border-radius:8px;padding:6px 10px;margin-bottom:8px}
+.legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+.legend .sw{width:12px;height:10px;border-radius:2px;flex:none}
+.legend .sw.ln{height:0;border-top:2px solid var(--ink-2)}
+.legend .sw.ln.dash{border-top-style:dashed}
+.legend .sw.ln.deep{border-top-color:var(--deep)}
+.chart-note{font-size:12px;font-weight:700;color:var(--ink-2);white-space:nowrap}
+.ax{font-size:11px;fill:var(--ink-3);font-weight:600}
+.ax.b{font-weight:700;fill:var(--ink-2)}
+.vl{font-size:11px;fill:var(--ink-2);font-weight:700}
+.grid line{stroke:var(--band);stroke-width:1}
+.chart-empty{padding:30px;text-align:center;color:var(--ink-3);font-weight:600}
+
+/* plan table */
+.plan{margin-top:12px}
+.plan-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;padding-bottom:6px;background:#fff}
+table.pt{border-collapse:separate;border-spacing:0;table-layout:fixed;width:max-content;min-width:100%}
+table.pt th,table.pt td{padding:0 10px;height:30px;border-bottom:1px solid var(--faint);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;font-size:13px;overflow:hidden;text-overflow:ellipsis}
+table.pt th{background:var(--faint);color:var(--ink);font-weight:700;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+table.pt th.lc,table.pt td.lc{text-align:left;position:sticky;left:0;z-index:2;background:#fff;border-right:1px solid var(--line)}
+table.pt th.lc{background:var(--faint)}
+table.pt th.tc,table.pt td.tc{position:sticky;right:0;z-index:2;background:var(--ghost);border-left:1px solid var(--line);font-weight:700}
+table.pt th.tc{background:var(--band)}
+table.pt td.yr,table.pt th.yr{border-left:2px solid var(--line-2)}
+table.pt tr.g td{background:var(--band);border-bottom:1px solid var(--line);height:28px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);text-align:left}
+table.pt tr.g td.lc{background:var(--band)}
+table.pt tr.g td.tc{background:var(--band)}
+table.pt tr:hover td{background:var(--faint)}
+table.pt tr:hover td.tc{background:var(--band)}
+table.pt tr.b td{font-weight:700}
+table.pt td.neg{color:var(--ink-2)}
+table.pt td.dash{color:var(--ink-3)}
+.rl{display:inline-flex;align-items:center;gap:5px;max-width:100%}
+.rl span{overflow:hidden;text-overflow:ellipsis}
+
+/* teams list (all teams view) */
+.tlist .trow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px;border-bottom:1px solid var(--faint)}
+.tlist .trow .nm{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tlist .trow .mt{font-size:12px;color:var(--ink-2);font-weight:600}
+.empty{padding:26px 14px;text-align:center;color:var(--ink-2);font-weight:600}
+.empty .btn{margin-top:10px}
+
+/* modal, toast */
+.mask{position:fixed;inset:0;background:rgba(0,22,40,.35);z-index:50;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;border-radius:12px;width:min(440px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;box-shadow:0 20px 50px rgba(0,22,40,.3)}
+.modal .mh{padding:14px 16px 8px;font-size:16px;font-weight:800;color:var(--deep)}
+.modal .mb{padding:0 16px 14px;color:var(--ink-2);font-size:13.5px;overflow:auto}
+.modal .mf{padding:10px 16px 14px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--line)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--deep);color:#fff;font-weight:700;font-size:13px;padding:9px 14px;border-radius:9px;box-shadow:0 8px 22px rgba(0,22,40,.3);z-index:60;opacity:0;transition:opacity .15s}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="tip" role="tooltip"></div>
+<div id="toast"></div>
+<script>
+/* ENGINE_START */
+// Revenue model engine. Pure functions, no DOM. Everything in the plan derives from these.
+(function (root) {
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  function uid() { return Math.random().toString(36).slice(2, 9); }
+
+  function defaultCompany() {
+    return { currency: '$', startYear: 2027, startMonth: 1, months: 36, grossMargin: 75, flm: 1.26 };
+  }
+
+  function defaultTeam(name) {
+    return {
+      id: uid(), name: name || 'SMB',
+      startingReps: 8, hiresPerMonth: 4, cap: 40, hiringStart: 0, backfillMonths: 2, attritionAnnual: 20,
+      rampMonths: 3, ramp: [0, 20, 60],
+      winsPerRep: 5, arpu: 5000,
+      bookToLive: 80, timeToLive: 1, churnAnnual: 12,
+      repOte: 120000, mgrSpan: 8, mgrOte: 180000, dirSpan: 4, dirOte: 250000,
+      otherCost: [
+        { id: uid(), name: 'Marketing', basis: 'golive', amount: 600 },
+        { id: uid(), name: 'Onboarding', basis: 'golive', amount: 400 },
+        { id: uid(), name: 'Enablement', basis: 'rep', amount: 250 },
+        { id: uid(), name: 'Tools and travel', basis: 'rep', amount: 300 },
+      ],
+    };
+  }
+
+  // Annual rate (percent) to the monthly rate that compounds to it.
+  function monthlyRate(annualPct) {
+    const a = Math.min(Math.max(+annualPct || 0, 0), 100) / 100;
+    if (a >= 1) return 1;
+    return 1 - Math.pow(1 - a, 1 / 12);
+  }
+
+  function horizonMonths(company) {
+    const out = [];
+    let y = +company.startYear, m = +company.startMonth;
+    for (let i = 0; i < company.months; i++) {
+      out.push({ i, y, m, key: y + '-' + String(m).padStart(2, '0'), label: MONTHS[m - 1] + ' ' + y, short: MONTHS[m - 1] + ' ' + String(y).slice(2), q: Math.floor((m - 1) / 3) + 1 });
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    return out;
+  }
+
+  const num = (v, d) => { const n = +v; return Number.isFinite(n) ? n : (d || 0); };
+  const ceilE = (x) => Math.ceil(x - 1e-9);
+
+  function rampPct(team, tenure) {
+    const n = Math.max(0, Math.round(num(team.rampMonths)));
+    if (tenure > n) return 1;
+    const v = team.ramp && team.ramp[tenure - 1];
+    return Math.min(Math.max(num(v), 0), 100) / 100;
+  }
+
+  // One team, one month at a time. Cohort based: every month's hires are a cohort with a tenure.
+  function runTeam(team, company) {
+    const H = horizonMonths(company);
+    const attrM = monthlyRate(team.attritionAnnual);
+    const churnM = monthlyRate(team.churnAnnual);
+    const gm = Math.min(Math.max(num(company.grossMargin), 0), 100) / 100;
+    const flm = Math.max(num(company.flm, 1), 0);
+    const cap = Math.max(0, num(team.cap));
+    const hpm = Math.max(0, num(team.hiresPerMonth));
+    const start = Math.max(0, Math.round(num(team.hiringStart)));
+    const backfill = Math.max(0, Math.round(num(team.backfillMonths)));
+    const ttl = Math.max(0, Math.round(num(team.timeToLive)));
+    const b2l = Math.min(Math.max(num(team.bookToLive), 0), 100) / 100;
+    const arpu = Math.max(0, num(team.arpu));
+    const wpr = Math.max(0, num(team.winsPerRep));
+    const rampN = Math.max(0, Math.round(num(team.rampMonths)));
+
+    const cohorts = [];
+    const s0 = Math.max(0, num(team.startingReps));
+    if (s0 > 0) cohorts.push({ size: s0, tenure: 10000, starting: true });
+    let seats = s0;
+    const departuresByMonth = [];
+    const winsByMonth = [];
+    const rows = [];
+    let endArr = 0, cumCost = 0, cumGp = 0, cumBooked = 0, cumGolives = 0, cumWins = 0, cumHires = 0, cumDep = 0, cumNewLive = 0, cumChurn = 0;
+    let breakeven = null, peakReps = 0;
+
+    for (let t = 0; t < H.length; t++) {
+      // 1. Departures, taken off every cohort that was here last month.
+      let departures = 0;
+      for (const c of cohorts) { if (c.tenure >= 1) { const loss = c.size * attrM; c.size -= loss; departures += loss; } }
+      departuresByMonth[t] = departures;
+      // 2. Seats open on the plan; departures reopen their seat after the backfill time.
+      let growth = 0;
+      if (t >= start && seats < cap) { const next = Math.min(cap, seats + hpm); growth = next - seats; seats = next; }
+      const back = t - backfill >= 0 ? (departuresByMonth[t - backfill] || 0) : 0;
+      const hires = growth + back;
+      for (const c of cohorts) c.tenure += 1;
+      if (hires > 0) cohorts.push({ size: hires, tenure: 1, starting: false });
+      // 3. Who is selling.
+      let reps = 0, ramping = 0, ramped = 0, capacity = 0;
+      for (const c of cohorts) {
+        reps += c.size;
+        const p = c.starting ? 1 : rampPct(team, c.tenure);
+        capacity += c.size * p;
+        if (!c.starting && c.tenure <= rampN) ramping += c.size; else ramped += c.size;
+      }
+      const wins = capacity * wpr;
+      const booked = wins * arpu;
+      winsByMonth[t] = wins;
+      // 4. Revenue: go-lives arrive after the time to live, churn comes off the opening balance.
+      const golives = (t - ttl >= 0 ? (winsByMonth[t - ttl] || 0) : 0) * b2l;
+      const newLive = golives * arpu;
+      const churned = endArr * churnM;
+      const openArr = endArr;
+      endArr = endArr + newLive - churned;
+      // 5. Cost of the team.
+      const mgrs = reps > 0 ? ceilE(reps / Math.max(1, num(team.mgrSpan, 1))) : 0;
+      const dSpan = Math.max(1, num(team.dirSpan, 1));
+      const dirs = mgrs >= dSpan ? Math.max(1, Math.round(mgrs / dSpan)) : 0;
+      const costRep = reps * num(team.repOte) * flm / 12;
+      const costMgr = mgrs * num(team.mgrOte) * flm / 12;
+      const costDir = dirs * num(team.dirOte) * flm / 12;
+      let costOther = 0;
+      for (const l of team.otherCost || []) {
+        const a = num(l.amount);
+        if (l.basis === 'golive') costOther += a * golives;
+        else if (l.basis === 'win') costOther += a * wins;
+        else if (l.basis === 'rep') costOther += a * reps;
+        else if (l.basis === 'month') costOther += a;
+      }
+      const costTotal = costRep + costMgr + costDir + costOther;
+      // 6. Unit economics.
+      const gpMonth = endArr / 12 * gm;
+      cumCost += costTotal; cumGp += gpMonth;
+      cumBooked += booked; cumGolives += golives; cumWins += wins; cumHires += hires; cumDep += departures; cumNewLive += newLive; cumChurn += churned;
+      const cumNet = cumGp - cumCost;
+      if (breakeven === null && t > 0 && cumNet >= 0) breakeven = t;
+      if (reps > peakReps) peakReps = reps;
+      const cac = golives > 0 ? costTotal / golives : null;
+      const payback = cac !== null && arpu > 0 && gm > 0 ? cac / (arpu * gm / 12) : null;
+      rows.push({ ...H[t], hires, growth, backfill: back, departures, seats, ramping, ramped, reps, mgrs, dirs, capacity, wins, booked, golives, newLive, churned, openArr, endArr, costRep, costMgr, costDir, costOther, costTotal, gpMonth, cac, payback, cumCost, cumGp, cumNet });
+    }
+
+    // At full strength: the cap fully ramped, steady state.
+    const fsReps = cap > 0 ? cap : s0;
+    const fsMgrs = fsReps > 0 ? ceilE(fsReps / Math.max(1, num(team.mgrSpan, 1))) : 0;
+    const fsDSpan = Math.max(1, num(team.dirSpan, 1));
+    const fsDirs = fsMgrs >= fsDSpan ? Math.max(1, Math.round(fsMgrs / fsDSpan)) : 0;
+    const fsWins = fsReps * wpr, fsGolives = fsWins * b2l;
+    let fsOther = 0;
+    for (const l of team.otherCost || []) {
+      const a = num(l.amount);
+      if (l.basis === 'golive') fsOther += a * fsGolives; else if (l.basis === 'win') fsOther += a * fsWins; else if (l.basis === 'rep') fsOther += a * fsReps; else if (l.basis === 'month') fsOther += a;
+    }
+    const fsCost = (fsReps * num(team.repOte) + fsMgrs * num(team.mgrOte) + fsDirs * num(team.dirOte)) * flm / 12 + fsOther;
+    const fsCac = fsGolives > 0 ? fsCost / fsGolives : null;
+    const fsPayback = fsCac !== null && arpu > 0 && gm > 0 ? fsCac / (arpu * gm / 12) : null;
+    const ltv = num(team.churnAnnual) > 0 ? arpu * gm / (Math.min(num(team.churnAnnual), 100) / 100) : null;
+    const blendedCac = cumGolives > 0 ? cumCost / cumGolives : null;
+    const last = rows[rows.length - 1] || {};
+    return {
+      team, rows,
+      summary: {
+        endArr, cumBooked, cumGolives, cumWins, cumHires, cumDep, cumNewLive, cumChurn, cumCost, cumGp, cumNet: cumGp - cumCost,
+        blendedCac, payback: blendedCac !== null && arpu > 0 && gm > 0 ? blendedCac / (arpu * gm / 12) : null,
+        ltv, ltvCac: ltv !== null && blendedCac ? ltv / blendedCac : null,
+        breakeven, peakReps, endReps: last.reps || 0, endMgrs: last.mgrs || 0, endDirs: last.dirs || 0,
+        arpu, gm,
+        full: { reps: fsReps, mgrs: fsMgrs, dirs: fsDirs, booked: fsWins * arpu, liveArr: fsGolives * arpu, cost: fsCost, cac: fsCac, payback: fsPayback, golives: fsGolives },
+      },
+    };
+  }
+
+  const SUM = ['hires','growth','backfill','departures','wins','booked','golives','newLive','churned','costRep','costMgr','costDir','costOther','costTotal','gpMonth'];
+  const CLOSE = ['seats','ramping','ramped','reps','mgrs','dirs','capacity','endArr','cumCost','cumGp','cumNet'];
+
+  // Sum several team runs into one company run. Flows add, balances add, ratios recompute from the sums.
+  function combineRuns(runs, company) {
+    const H = horizonMonths(company);
+    const gm = Math.min(Math.max(num(company.grossMargin), 0), 100) / 100;
+    const rows = H.map((h, t) => {
+      const r = { ...h, openArr: 0 };
+      for (const k of SUM.concat(CLOSE)) r[k] = 0;
+      for (const run of runs) { const x = run.rows[t]; if (!x) continue; for (const k of SUM.concat(CLOSE)) r[k] += x[k]; r.openArr += x.openArr; }
+      r.cac = r.golives > 0 ? r.costTotal / r.golives : null;
+      const arpuB = r.golives > 0 ? r.newLive / r.golives : 0;
+      r.payback = r.cac !== null && arpuB > 0 && gm > 0 ? r.cac / (arpuB * gm / 12) : null;
+      return r;
+    });
+    const s = { endArr: 0, cumBooked: 0, cumGolives: 0, cumWins: 0, cumHires: 0, cumDep: 0, cumNewLive: 0, cumChurn: 0, cumCost: 0, cumGp: 0, peakReps: 0, endReps: 0, endMgrs: 0, endDirs: 0, gm, full: { reps: 0, mgrs: 0, dirs: 0, booked: 0, liveArr: 0, cost: 0, golives: 0 } };
+    let ltvWeighted = 0;
+    for (const run of runs) {
+      const x = run.summary;
+      for (const k of ['endArr','cumBooked','cumGolives','cumWins','cumHires','cumDep','cumNewLive','cumChurn','cumCost','cumGp','endReps','endMgrs','endDirs']) s[k] += x[k];
+      for (const k of ['reps','mgrs','dirs','booked','liveArr','cost','golives']) s.full[k] += x.full[k];
+      if (x.ltv !== null) ltvWeighted += x.ltv * x.cumGolives;
+    }
+    s.cumNet = s.cumGp - s.cumCost;
+    s.peakReps = rows.reduce((m, r) => Math.max(m, r.reps), 0);
+    s.blendedCac = s.cumGolives > 0 ? s.cumCost / s.cumGolives : null;
+    s.arpu = s.cumGolives > 0 ? s.cumNewLive / s.cumGolives : 0;
+    s.payback = s.blendedCac !== null && s.arpu > 0 && gm > 0 ? s.blendedCac / (s.arpu * gm / 12) : null;
+    s.ltv = s.cumGolives > 0 ? ltvWeighted / s.cumGolives : null;
+    s.ltvCac = s.ltv !== null && s.blendedCac ? s.ltv / s.blendedCac : null;
+    s.breakeven = null;
+    for (let t = 1; t < rows.length; t++) { if (rows[t].cumNet >= 0) { s.breakeven = t; break; } }
+    s.full.cac = s.full.golives > 0 ? s.full.cost / s.full.golives : null;
+    const fsArpu = s.full.golives > 0 ? s.full.liveArr / s.full.golives : 0;
+    s.full.payback = s.full.cac !== null && fsArpu > 0 && gm > 0 ? s.full.cac / (fsArpu * gm / 12) : null;
+    return { team: null, rows, summary: s };
+  }
+
+  // Roll monthly rows up to quarters or years. Flows sum, balances take the closing month, ratios recompute.
+  function rollup(rows, view, gm) {
+    if (view === 'month') return rows.map(r => ({ ...r, cols: [r], plabel: r.label, pkey: r.key }));
+    const groups = [];
+    for (const r of rows) {
+      const gk = view === 'quarter' ? r.y + 'Q' + r.q : String(r.y);
+      let g = groups[groups.length - 1];
+      if (!g || g.pkey !== gk) { g = { pkey: gk, plabel: view === 'quarter' ? 'Q' + r.q + ' ' + r.y : String(r.y), cols: [] }; groups.push(g); }
+      g.cols.push(r);
+    }
+    return groups.map(g => aggregate(g, gm));
+  }
+
+  function aggregate(g, gm) {
+    const out = { pkey: g.pkey, plabel: g.plabel, cols: g.cols, label: g.plabel, key: g.pkey };
+    const last = g.cols[g.cols.length - 1];
+    for (const k of SUM) out[k] = g.cols.reduce((a, r) => a + (r[k] || 0), 0);
+    for (const k of CLOSE) out[k] = last[k];
+    out.openArr = g.cols[0].openArr;
+    out.cac = out.golives > 0 ? out.costTotal / out.golives : null;
+    const arpuB = out.golives > 0 ? out.newLive / out.golives : 0;
+    out.payback = out.cac !== null && arpuB > 0 && gm > 0 ? out.cac / (arpuB * gm / 12) : null;
+    return out;
+  }
+
+  function totalColumn(rows, gm) {
+    if (!rows.length) return null;
+    const t = aggregate({ pkey: 'total', plabel: 'Total', cols: rows }, gm);
+    return t;
+  }
+
+  const api = { MONTHS, uid, defaultCompany, defaultTeam, monthlyRate, horizonMonths, rampPct, runTeam, combineRuns, rollup, aggregate, totalColumn, SUM, CLOSE };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.RevEngine = api;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ENGINE_END */
+</script>
+<script>
+(function () {
+'use strict';
+const { useState, useEffect, useMemo, useRef, useCallback } = React;
+const h = React.createElement;
+const E = window.RevEngine;
+const LS_KEY = 'cirri_revmodel_v1';
+
+/* ---------- icons (lucide-style, currentColor) ---------- */
+const ICON = {
+  info: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z M12 16v-4 M12 8h.01',
+  plus: 'M5 12h14 M12 5v14',
+  x: 'M18 6 6 18 M6 6l12 12',
+  copy: 'M8 8h12v12H8z M16 8V4H4v12h4',
+  download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3',
+  upload: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12',
+  reset: 'M3 12a9 9 0 1 0 3-6.7L3 8 M3 3v5h5',
+  open: 'M7 17 17 7 M7 7h10v10',
+  dup: 'M9 9h11v11H9z M15 9V5H5v10h4',
+  trash: 'M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6 M10 11v6 M14 11v6',
+};
+function Icon(name, size) {
+  const s = size || 14;
+  return h('svg', { width: s, height: s, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': 'true' }, h('path', { d: ICON[name] }));
+}
+const Mark = () => h('svg', { className: 'mark', viewBox: '0 0 26 26', 'aria-hidden': 'true' },
+  h('circle', { cx: 13, cy: 13, r: 12, fill: '#001628' }),
+  h('path', { d: 'M18.5 9.2a6 6 0 1 0 0 7.6', fill: 'none', stroke: '#8dd2d1', strokeWidth: 2.6, strokeLinecap: 'round' }),
+  h('circle', { cx: 19.4, cy: 13, r: 1.6, fill: '#f5c518' }));
+
+/* ---------- tooltip layer (fixed, never clipped by scroll boxes) ---------- */
+(function tipLayer() {
+  const tip = document.getElementById('tip');
+  let cur = null;
+  function show(el) {
+    cur = el; tip.textContent = el.getAttribute('data-tip'); tip.style.display = 'block';
+    const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight, vw = window.innerWidth, vh = window.innerHeight;
+    let x = r.left + r.width / 2 - tw / 2; x = Math.max(8, Math.min(vw - tw - 8, x));
+    let y = r.top - th - 8; if (y < 8) y = r.bottom + 8; if (y + th > vh - 8) y = Math.max(8, r.top - th - 8);
+    tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  }
+  function hide() { cur = null; tip.style.display = 'none'; }
+  document.addEventListener('mouseover', e => { const el = e.target.closest && e.target.closest('[data-tip]'); if (el && el !== cur) show(el); else if (!el && cur) hide(); });
+  document.addEventListener('mouseout', e => { const el = e.target.closest && e.target.closest('[data-tip]'); if (cur && el === cur && !(e.relatedTarget && el.contains(e.relatedTarget))) hide(); });
+  document.addEventListener('focusin', e => { const el = e.target.closest && e.target.closest('[data-tip]'); if (el) show(el); });
+  document.addEventListener('focusout', hide);
+  window.addEventListener('scroll', hide, true);
+})();
+const Hint = (tip, big) => h('span', { className: big ? 'hhint' : 'fhint', 'data-tip': tip, tabIndex: 0 }, Icon('info', big ? 16 : 13));
+
+/* ---------- formatting ---------- */
+const CUR = () => '$';
+function fmtMoney(v, full) {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '-';
+  const s = v < 0 ? '-' : '', a = Math.abs(v);
+  if (full) return s + CUR() + Math.round(a).toLocaleString('en-US');
+  if (a >= 1e9) return s + CUR() + (a / 1e9).toFixed(2) + 'B';
+  if (a >= 1e6) return s + CUR() + (a / 1e6).toFixed(a >= 1e8 ? 0 : 1) + 'M';
+  if (a >= 1e3) return s + CUR() + (a / 1e3).toFixed(a >= 1e4 ? 0 : 1) + 'K';
+  return s + CUR() + Math.round(a);
+}
+function fmtCount(v) {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '-';
+  if (Math.abs(v) >= 100 || Math.abs(v - Math.round(v)) < 0.05) return Math.round(v).toLocaleString('en-US');
+  return v.toFixed(1);
+}
+function fmtInt(v) { return v === null || v === undefined || !Number.isFinite(v) ? '-' : Math.round(v).toLocaleString('en-US'); }
+function fmtMo(v) { return v === null || v === undefined || !Number.isFinite(v) ? '-' : v.toFixed(1); }
+function fmtX(v) { return v === null || v === undefined || !Number.isFinite(v) ? '-' : v.toFixed(1) + 'x'; }
+function fmtPct(v) { return v === null || v === undefined || !Number.isFinite(v) ? '-' : (Math.round(v * 10) / 10) + '%'; }
+function plural(n, one, many) { return Math.round(n * 10) / 10 === 1 ? one : (many || one + 's'); }
+
+/* ---------- state ---------- */
+function freshState() {
+  const company = E.defaultCompany();
+  const t = E.defaultTeam('SMB');
+  return { v: 1, company, teams: [t], scope: t.id, view: 'month' };
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(LS_KEY); if (!raw) return freshState();
+    const s = JSON.parse(raw);
+    if (!s || !s.company || !Array.isArray(s.teams)) return freshState();
+    if (!s.view) s.view = 'month';
+    if (s.scope !== 'all' && !s.teams.some(t => t.id === s.scope)) s.scope = s.teams[0] ? s.teams[0].id : 'all';
+    return s;
+  } catch (e) { return freshState(); }
+}
+function saveState(s) { try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch (e) {} }
+let toastT = null;
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2200); }
+
+/* ---------- atoms ---------- */
+function Btn(p, ...kids) { return h('button', { type: 'button', className: 'btn' + (p.kind ? ' ' + p.kind : '') + (p.sm ? ' sm' : ''), onClick: p.onClick, disabled: p.disabled, 'data-tip': p.tip, title: p.title }, ...kids); }
+function Seg({ value, options, onChange, sm }) {
+  return h('div', { className: 'seg' + (sm ? ' sm' : ''), role: 'tablist' }, ...options.map(o => h('button', { key: o.id, type: 'button', role: 'tab', 'aria-selected': o.id === value, className: o.id === value ? 'on' : '', onClick: () => onChange(o.id) }, o.label)));
+}
+function SectionTitle(text, tip, right) {
+  return h('div', { className: 'section-title' }, text, tip ? Hint(tip) : null, right ? h('span', { className: 'grow' }) : null, right || null);
+}
+function SRow(label, tip, ctl, wide) {
+  return h('div', { className: 'srow' + (wide ? ' wide' : '') }, h('div', { className: 'lab' }, h('span', null, label), tip ? Hint(tip) : null), wide ? null : h('div', { className: 'ctl' }, ctl));
+}
+// Number input: keeps what you type while typing, formats on blur, commits every valid keystroke so the plan moves live.
+function NumField({ value, onCommit, min, max, pre, suf, decimals, money, w, integer, ariaLabel }) {
+  const fmt = v => { if (!Number.isFinite(v)) return ''; return money ? Math.round(v).toLocaleString('en-US') : (decimals ? (+v.toFixed(decimals)).toString() : String(Math.round(v * 1000) / 1000)); };
+  const [txt, setTxt] = useState(fmt(value));
+  const [focus, setFocus] = useState(false);
+  useEffect(() => { if (!focus) setTxt(fmt(value)); }, [value, focus]);
+  const parse = s => { const n = parseFloat(String(s).replace(/[^0-9.\-]/g, '')); return Number.isFinite(n) ? n : null; };
+  const clamp = n => { if (min !== undefined && n < min) n = min; if (max !== undefined && n > max) n = max; if (integer) n = Math.round(n); return n; };
+  return h('label', { className: 'num' + (w ? ' ' + w : '') },
+    pre ? h('span', { className: 'pre' }, pre) : null,
+    h('input', { className: 'num-in', type: 'text', inputMode: 'decimal', value: txt, 'aria-label': ariaLabel,
+      onFocus: e => { setFocus(true); setTxt(Number.isFinite(value) ? String(value) : ''); requestAnimationFrame(() => { try { e.target.select(); } catch (x) {} }); },
+      onChange: e => { const s = e.target.value; setTxt(s); const n = parse(s); if (n !== null) onCommit(clamp(n)); },
+      onBlur: () => { setFocus(false); const n = parse(txt); if (n === null) { setTxt(fmt(value)); } else { const c = clamp(n); onCommit(c); setTxt(fmt(c)); } },
+      onKeyDown: e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); const step = e.shiftKey ? 10 : 1; const n = clamp((Number.isFinite(value) ? value : 0) + (e.key === 'ArrowUp' ? step : -step)); onCommit(n); setTxt(String(n)); } } }),
+    suf ? h('span', { className: 'suf' }, suf) : null);
+}
+function Modal({ title, body, confirmLabel, danger, onConfirm, onClose }) {
+  useEffect(() => { const k = e => { if (e.key === 'Escape') onClose(); }; document.addEventListener('keydown', k); return () => document.removeEventListener('keydown', k); }, []);
+  return h('div', { className: 'mask', onMouseDown: e => { if (e.target === e.currentTarget) onClose(); } },
+    h('div', { className: 'modal', role: 'dialog', 'aria-modal': true, 'aria-label': title },
+      h('div', { className: 'mh' }, title), h('div', { className: 'mb' }, body),
+      h('div', { className: 'mf' }, Btn({ onClick: onClose }, 'Keep'), Btn({ kind: danger ? 'danger' : 'secondary', onClick: onConfirm }, confirmLabel))));
+}
+function useSize() {
+  const ref = useRef(null); const [w, setW] = useState(0);
+  useEffect(() => { if (!ref.current) return; const ro = new ResizeObserver(en => { for (const e of en) setW(Math.floor(e.contentRect.width)); }); ro.observe(ref.current); setW(Math.floor(ref.current.getBoundingClientRect().width)); return () => ro.disconnect(); }, []);
+  return [ref, w];
+}
+function niceTicks(max, n) {
+  if (!(max > 0)) return [0, 1];
+  const raw = max / (n || 4), p = Math.pow(10, Math.floor(Math.log10(raw))); const f = raw / p;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  const out = []; for (let v = 0; v <= max + step * 0.999; v += step) out.push(v); return out;
+}
+
+/* ---------- assumptions panel ---------- */
+const TIP = {
+  first: 'The model starts here with zero ARR from this team and the reps on day one already ramped.',
+  months: 'How far out to run the plan. Three years is the usual finance ask.',
+  gm: 'Used for payback and lifetime value. CAC is paid back out of gross profit, not revenue.',
+  flm: 'OTE times this is what a person costs: payroll taxes, benefits, equipment. Cirri uses the same multiplier on the roster.',
+  starting: 'Ramped reps already on the team when the model starts. They sell at full productivity from the first month.',
+  hpm: 'Seats added to the plan each month until the cap. Departures are backfilled on top of this, so it is the net growth in seats.',
+  cap: 'The team stops growing here. After that, hiring is replacement only.',
+  hstart: 'The first month growth hires join. Backfills for departures are not held back by this.',
+  backfill: 'How long a seat sits empty after someone leaves before the replacement joins. Every replacement then ramps from zero.',
+  attr: 'Annual rep attrition, applied each month as the rate that compounds to it. 20% a year is 1.8% a month. Reps mid-ramp leave at the same rate, which is where ramp cost gets lost.',
+  ramp: 'Share of full productivity a new rep reaches in each month of tenure. A rep hired in January is in ramp month 1 in January. After the last ramp month they sell at 100%.',
+  wins: 'Expected closed-won deals a month per fully ramped rep. Quota times attainment, if that is how you think of it.',
+  arpu: 'Annual recurring revenue per win. Ending ARR, payback and lifetime value all read off this.',
+  b2l: 'Share of wins that actually go live. The rest never turn into revenue.',
+  ttl: 'Months between the win and the account going live. Revenue and churn start at go-live.',
+  churn: 'Annual revenue churn on the live ARR this team produced, applied monthly as the compounding rate. Ending ARR is net of it.',
+  repOte: 'On-target earnings, base plus variable, paid in full through ramp. Multiplied by the fully loaded multiplier.',
+  mgrSpan: 'Managers are reps divided by this, rounded up, so a partial team still has a manager.',
+  mgrOte: 'On-target earnings for a front-line manager.',
+  dirSpan: 'No director until managers reach this span; the leader above absorbs them. Then managers divided by the span, rounded to the nearest whole.',
+  dirOte: 'On-target earnings for a director.',
+  other: 'Cost outside the sales org that belongs in CAC: marketing, onboarding, enablement, tools. Per go-live, per win, per rep a month, or a flat amount a month.',
+  name: 'Shown on the scope control and in the teams list.',
+  teams: 'Each team runs its own plan with its own assumptions. All teams is the sum.',
+};
+const BASES = [{ id: 'golive', label: 'per go-live' }, { id: 'win', label: 'per win' }, { id: 'rep', label: 'per rep a month' }, { id: 'month', label: 'a month' }];
+
+function CompanyPanel({ company, setCompany }) {
+  const H = E.horizonMonths(company); const last = H[H.length - 1];
+  const years = []; for (let y = company.startYear - 3; y <= company.startYear + 6; y++) years.push(y);
+  return h(React.Fragment, null,
+    SectionTitle('Company', null),
+    SRow('First month', TIP.first, h(React.Fragment, null,
+      h('select', { className: 'inp', style: { width: 66 }, value: company.startMonth, 'aria-label': 'First month', onChange: e => setCompany({ ...company, startMonth: +e.target.value }) }, ...E.MONTHS.map((m, i) => h('option', { key: m, value: i + 1 }, m))),
+      h('select', { className: 'inp', style: { width: 78 }, value: company.startYear, 'aria-label': 'First year', onChange: e => setCompany({ ...company, startYear: +e.target.value }) }, ...years.map(y => h('option', { key: y, value: y }, y))))),
+    SRow('Months', TIP.months, h(React.Fragment, null, h('span', { className: 'after' }, 'through ' + last.label), h(NumField, { value: company.months, min: 3, max: 120, integer: true, w: 'w-sm', ariaLabel: 'Months', onCommit: v => setCompany({ ...company, months: v }) }))),
+    SRow('Gross margin', TIP.gm, h(NumField, { value: company.grossMargin, min: 0, max: 100, suf: '%', w: 'w-sm', ariaLabel: 'Gross margin', onCommit: v => setCompany({ ...company, grossMargin: v }) })),
+    SRow('Fully loaded multiplier', TIP.flm, h(NumField, { value: company.flm, min: 1, max: 3, decimals: 2, suf: 'x', w: 'w-sm', ariaLabel: 'Fully loaded multiplier', onCommit: v => setCompany({ ...company, flm: v }) })));
+}
+
+function TeamPanel({ team, company, setTeam, onDuplicate, onRemove }) {
+  const H = E.horizonMonths(company);
+  const up = patch => setTeam({ ...team, ...patch });
+  const rampN = Math.max(0, Math.round(team.rampMonths || 0));
+  const setRampN = n => { const ramp = (team.ramp || []).slice(0, n); while (ramp.length < n) ramp.push(ramp.length ? Math.min(100, ramp[ramp.length - 1] + 25) : 0); up({ rampMonths: n, ramp }); };
+  const setRampAt = (i, v) => { const ramp = (team.ramp || []).slice(); ramp[i] = v; up({ ramp }); };
+  const setLine = (id, patch) => up({ otherCost: team.otherCost.map(l => l.id === id ? { ...l, ...patch } : l) });
+  return h(React.Fragment, null,
+    SectionTitle('Team', null),
+    SRow('Team name', TIP.name, h('input', { className: 'inp', value: team.name, 'aria-label': 'Team name', onChange: e => up({ name: e.target.value }) })),
+
+    SectionTitle('Hiring', null),
+    SRow('Reps on day one', TIP.starting, h(NumField, { value: team.startingReps, min: 0, max: 5000, w: 'w-sm', ariaLabel: 'Reps on day one', onCommit: v => up({ startingReps: v }) })),
+    SRow('Hires a month', TIP.hpm, h(NumField, { value: team.hiresPerMonth, min: 0, max: 500, decimals: 1, w: 'w-sm', ariaLabel: 'Hires a month', onCommit: v => up({ hiresPerMonth: v }) })),
+    SRow('Headcount cap', TIP.cap, h(NumField, { value: team.cap, min: 0, max: 5000, integer: true, w: 'w-sm', ariaLabel: 'Headcount cap', onCommit: v => up({ cap: v }) })),
+    SRow('Growth hiring starts', TIP.hstart, h('select', { className: 'inp', value: Math.min(team.hiringStart || 0, H.length - 1), 'aria-label': 'Growth hiring starts', onChange: e => up({ hiringStart: +e.target.value }) }, ...H.map(m => h('option', { key: m.key, value: m.i }, m.label)))),
+    SRow('Time to backfill', TIP.backfill, h(NumField, { value: team.backfillMonths, min: 0, max: 12, integer: true, suf: 'mo', w: 'w-sm', ariaLabel: 'Time to backfill', onCommit: v => up({ backfillMonths: v }) })),
+    SRow('Rep attrition', TIP.attr, h(NumField, { value: team.attritionAnnual, min: 0, max: 100, suf: '% a yr', w: 'w-md', ariaLabel: 'Rep attrition', onCommit: v => up({ attritionAnnual: v }) })),
+
+    SectionTitle('Ramp', null),
+    SRow('Ramp', TIP.ramp, h(NumField, { value: rampN, min: 0, max: 12, integer: true, suf: 'mo', w: 'w-sm', ariaLabel: 'Ramp months', onCommit: setRampN })),
+    rampN > 0 ? h('div', { className: 'ramp-grid' },
+      ...Array.from({ length: rampN }, (_, i) => h('div', { key: i, className: 'ramp-cell' }, h('span', { className: 'k' }, 'Month ' + (i + 1)), h(NumField, { value: team.ramp[i] || 0, min: 0, max: 100, suf: '%', ariaLabel: 'Ramp month ' + (i + 1), onCommit: v => setRampAt(i, v) }))),
+      h('div', { className: 'ramp-then' }, 'then 100%')) : h('div', { className: 'ramp-then', style: { padding: '2px 8px 8px' } }, 'New reps sell at 100% from their first month.'),
+
+    SectionTitle('Productivity', null),
+    SRow('Wins per rep a month', TIP.wins, h(NumField, { value: team.winsPerRep, min: 0, max: 1000, decimals: 2, w: 'w-sm', ariaLabel: 'Wins per rep a month', onCommit: v => up({ winsPerRep: v }) })),
+    SRow('ARPU', TIP.arpu, h(NumField, { value: team.arpu, min: 0, max: 1e8, money: true, pre: CUR(), suf: 'a yr', w: 'w-md', ariaLabel: 'ARPU', onCommit: v => up({ arpu: v }) })),
+
+    SectionTitle('Revenue', null),
+    SRow('Book to live', TIP.b2l, h(NumField, { value: team.bookToLive, min: 0, max: 100, suf: '%', w: 'w-sm', ariaLabel: 'Book to live', onCommit: v => up({ bookToLive: v }) })),
+    SRow('Time to go live', TIP.ttl, h(NumField, { value: team.timeToLive, min: 0, max: 12, integer: true, suf: 'mo', w: 'w-sm', ariaLabel: 'Time to go live', onCommit: v => up({ timeToLive: v }) })),
+    SRow('Customer churn', TIP.churn, h(NumField, { value: team.churnAnnual, min: 0, max: 100, suf: '% a yr', w: 'w-md', ariaLabel: 'Customer churn', onCommit: v => up({ churnAnnual: v }) })),
+
+    SectionTitle('Team cost', null),
+    SRow('Rep OTE', TIP.repOte, h(NumField, { value: team.repOte, min: 0, max: 1e7, money: true, pre: CUR(), w: 'w-md', ariaLabel: 'Rep OTE', onCommit: v => up({ repOte: v }) })),
+    SRow('Reps per manager', TIP.mgrSpan, h(NumField, { value: team.mgrSpan, min: 1, max: 50, integer: true, w: 'w-sm', ariaLabel: 'Reps per manager', onCommit: v => up({ mgrSpan: v }) })),
+    SRow('Manager OTE', TIP.mgrOte, h(NumField, { value: team.mgrOte, min: 0, max: 1e7, money: true, pre: CUR(), w: 'w-md', ariaLabel: 'Manager OTE', onCommit: v => up({ mgrOte: v }) })),
+    SRow('Managers per director', TIP.dirSpan, h(NumField, { value: team.dirSpan, min: 1, max: 50, integer: true, w: 'w-sm', ariaLabel: 'Managers per director', onCommit: v => up({ dirSpan: v }) })),
+    SRow('Director OTE', TIP.dirOte, h(NumField, { value: team.dirOte, min: 0, max: 1e7, money: true, pre: CUR(), w: 'w-md', ariaLabel: 'Director OTE', onCommit: v => up({ dirOte: v }) })),
+
+    SectionTitle('Other acquisition cost', TIP.other),
+    ...team.otherCost.map(l => h('div', { key: l.id, className: 'ocost' },
+      h('input', { className: 'inp nm', value: l.name, placeholder: 'What the cost is', 'aria-label': 'Cost name', onChange: e => setLine(l.id, { name: e.target.value }) }),
+      h('button', { type: 'button', className: 'xbtn', 'aria-label': 'Remove ' + (l.name || 'line'), 'data-tip': 'Remove this line', onClick: () => up({ otherCost: team.otherCost.filter(x => x.id !== l.id) }) }, Icon('x', 13)),
+      h('div', { className: 'bs' },
+        h('select', { className: 'inp', value: l.basis, 'aria-label': 'Basis', onChange: e => setLine(l.id, { basis: e.target.value }) }, ...BASES.map(b => h('option', { key: b.id, value: b.id }, b.label))),
+        h(NumField, { value: l.amount, min: 0, max: 1e8, money: true, pre: CUR(), ariaLabel: 'Amount', onCommit: v => setLine(l.id, { amount: v }) })))),
+    h('div', { style: { padding: '6px 8px 4px' } }, Btn({ sm: true, onClick: () => up({ otherCost: team.otherCost.concat([{ id: E.uid(), name: '', basis: 'golive', amount: 0 }]) }) }, Icon('plus', 12), 'Add a line')),
+
+    h('div', { style: { display: 'flex', gap: 8, padding: '14px 8px 16px', justifyContent: 'flex-end' } },
+      Btn({ sm: true, onClick: onDuplicate }, Icon('dup', 12), 'Duplicate team'),
+      Btn({ sm: true, kind: 'danger', onClick: onRemove }, Icon('trash', 12), 'Remove team')));
+}
+
+function TeamsList({ teams, runs, onOpen, onAdd }) {
+  if (!teams.length) return h('div', { className: 'empty' }, 'Add a team to start the model.', h('div', null, Btn({ kind: 'primary', onClick: onAdd }, Icon('plus', 13), 'Add a team')));
+  return h('div', { className: 'tlist' },
+    SectionTitle('Teams', TIP.teams),
+    ...teams.map(t => { const r = runs.find(x => x.team === t); const s = r.summary;
+      return h('div', { key: t.id, className: 'trow' },
+        h('div', { style: { minWidth: 0 } }, h('div', { className: 'nm' }, t.name || 'Untitled team'), h('div', { className: 'mt' }, fmtCount(s.full.reps) + ' reps at cap, ' + fmtMoney(s.endArr) + ' ending ARR, ' + (s.payback === null ? 'no payback' : fmtMo(s.payback) + ' month payback'))),
+        Btn({ sm: true, onClick: () => onOpen(t.id) }, 'Open', Icon('open', 12))); }));
+}
+
+/* ---------- charts ---------- */
+const PAD = { l: 58, r: 14, t: 18, b: 30 };
+function BridgeChart({ rows, gm, endLabel }) {
+  const [ref, w] = useSize();
+  const byQ = rows.length > 15;
+  const q = useMemo(() => E.rollup(rows, byQ ? 'quarter' : 'month', gm), [rows, gm, byQ]);
+  const H = 300;
+  if (!w || !q.length) return h('div', { ref, className: 'chart-empty' }, w ? 'Nothing to draw yet.' : '');
+  let max = 0, run = 0; const seg = q.map(p => { const a = run, b = run + p.newLive; run = b - p.churned; max = Math.max(max, b); return { p, a, b, c: run }; });
+  max = Math.max(max, 1);
+  const ticks = niceTicks(max, 4); const top = ticks[ticks.length - 1] || 1;
+  const iw = w - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
+  const slot = iw / (q.length + 1); const bw = Math.max(4, Math.min(28, slot * 0.36));
+  const y = v => PAD.t + ih - (v / top) * ih;
+  const kids = [];
+  kids.push(h('defs', { key: 'd' }, h('pattern', { id: 'hatch', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, h('rect', { width: 6, height: 6, fill: '#f2f6fa' }), h('line', { x1: 0, y1: 0, x2: 0, y2: 6, stroke: '#2c4a60', strokeWidth: 1.4 }))));
+  kids.push(h('g', { key: 'g', className: 'grid' }, ...ticks.map(t => h('line', { key: t, x1: PAD.l, x2: w - PAD.r, y1: y(t), y2: y(t) }))));
+  kids.push(h('g', { key: 'ay' }, ...ticks.map(t => h('text', { key: t, className: 'ax', x: PAD.l - 8, y: y(t) + 4, textAnchor: 'end' }, fmtMoney(t)))));
+  seg.forEach((s, i) => {
+    const x0 = PAD.l + slot * i + slot / 2 - bw;
+    const yearEnd = i < seg.length - 1 && s.p.cols[s.p.cols.length - 1].m === 12;
+    kids.push(h('g', { key: 'q' + i },
+      h('rect', { x: x0, y: y(s.b), width: bw, height: Math.max(0.5, y(s.a) - y(s.b)), fill: '#8dd2d1', rx: 1.5 }, h('title', null, s.p.plabel + ': ' + fmtMoney(s.p.newLive, true) + ' new live ARR')),
+      h('rect', { x: x0 + bw, y: y(s.b), width: bw, height: Math.max(0.5, y(s.c) - y(s.b)), fill: 'url(#hatch)', stroke: '#2c4a60', strokeWidth: 0.8, rx: 1.5 }, h('title', null, s.p.plabel + ': ' + fmtMoney(s.p.churned, true) + ' churned')),
+      h('line', { x1: x0 + bw * 2, x2: x0 + slot, y1: y(s.c), y2: y(s.c), stroke: '#2c4a60', strokeWidth: 1, strokeDasharray: '2 2' }),
+      h('text', { className: 'ax' + (yearEnd ? ' b' : ''), x: x0 + bw, y: H - 10, textAnchor: 'middle' }, byQ ? s.p.plabel : s.p.cols[0].short),
+      yearEnd ? h('text', { className: 'vl', x: x0 + bw, y: y(Math.max(s.b, s.c)) - 6, textAnchor: 'middle' }, fmtMoney(s.c)) : null));
+  });
+  const last = seg[seg.length - 1]; const xe = PAD.l + slot * seg.length + slot / 2 - bw;
+  kids.push(h('g', { key: 'end' },
+    h('rect', { x: xe, y: y(last.c), width: bw * 2, height: Math.max(0.5, y(0) - y(last.c)), fill: '#001628', rx: 1.5 }, h('title', null, 'Ending ARR ' + fmtMoney(last.c, true))),
+    h('text', { className: 'ax b', x: xe + bw, y: H - 10, textAnchor: 'middle' }, endLabel),
+    h('text', { className: 'vl', x: xe + bw, y: y(last.c) - 6, textAnchor: 'middle', style: { fontWeight: 800 } }, fmtMoney(last.c))));
+  return h('div', { ref }, h('svg', { width: w, height: H, role: 'img', 'aria-label': 'ARR bridge' }, ...kids));
+}
+
+function HeadcountChart({ rows, cap }) {
+  const [ref, w] = useSize(); const H = 240;
+  if (!w || !rows.length) return h('div', { ref, className: 'chart-empty' }, '');
+  const max = Math.max(1, cap || 0, ...rows.map(r => r.reps));
+  const ticks = niceTicks(max, 4); const top = ticks[ticks.length - 1] || 1;
+  const iw = w - PAD.l - PAD.r, ih = H - PAD.t - PAD.b, slot = iw / rows.length, bw = Math.max(2, slot * 0.68);
+  const y = v => PAD.t + ih - (v / top) * ih;
+  const step = rows.length > 24 ? 6 : rows.length > 12 ? 3 : 1;
+  return h('div', { ref }, h('svg', { width: w, height: H, role: 'img', 'aria-label': 'Headcount by month' },
+    h('g', { className: 'grid' }, ...ticks.map(t => h('line', { key: t, x1: PAD.l, x2: w - PAD.r, y1: y(t), y2: y(t) }))),
+    h('g', null, ...ticks.map(t => h('text', { key: t, className: 'ax', x: PAD.l - 8, y: y(t) + 4, textAnchor: 'end' }, fmtCount(t)))),
+    ...rows.map((r, i) => { const x = PAD.l + slot * i + (slot - bw) / 2;
+      return h('g', { key: r.key },
+        h('rect', { x, y: y(r.ramped), width: bw, height: Math.max(0, y(0) - y(r.ramped)), fill: '#001628' }, h('title', null, r.label + ': ' + fmtCount(r.ramped) + ' ramped, ' + fmtCount(r.ramping) + ' ramping, ' + fmtCount(r.departures) + ' left')),
+        h('rect', { x, y: y(r.ramped + r.ramping), width: bw, height: Math.max(0, y(r.ramped) - y(r.ramped + r.ramping)), fill: '#8dd2d1' }),
+        (i % step === 0) ? h('text', { className: 'ax', x: x + bw / 2, y: H - 10, textAnchor: 'middle' }, r.short) : null); }),
+    cap > 0 && cap <= top ? h('g', null, h('line', { x1: PAD.l, x2: w - PAD.r, y1: y(cap), y2: y(cap), stroke: '#2c4a60', strokeWidth: 1.2, strokeDasharray: '4 3' }), h('text', { className: 'vl', x: w - PAD.r, y: y(cap) - 5, textAnchor: 'end' }, 'Cap ' + fmtCount(cap))) : null));
+}
+
+function InvestChart({ rows, breakeven }) {
+  const [ref, w] = useSize(); const H = 240;
+  if (!w || !rows.length) return h('div', { ref, className: 'chart-empty' }, '');
+  const max = Math.max(1, ...rows.map(r => Math.max(r.cumCost, r.cumGp)));
+  const ticks = niceTicks(max, 4); const top = ticks[ticks.length - 1] || 1;
+  const iw = w - PAD.l - PAD.r, ih = H - PAD.t - PAD.b;
+  const x = i => PAD.l + (rows.length > 1 ? (i / (rows.length - 1)) * iw : iw / 2), y = v => PAD.t + ih - (v / top) * ih;
+  const path = k => rows.map((r, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(r[k]).toFixed(1)).join(' ');
+  const step = rows.length > 24 ? 6 : rows.length > 12 ? 3 : 1;
+  const be = breakeven !== null && breakeven !== undefined ? rows[breakeven] : null;
+  return h('div', { ref }, h('svg', { width: w, height: H, role: 'img', 'aria-label': 'Cumulative cost against cumulative gross profit' },
+    h('g', { className: 'grid' }, ...ticks.map(t => h('line', { key: t, x1: PAD.l, x2: w - PAD.r, y1: y(t), y2: y(t) }))),
+    h('g', null, ...ticks.map(t => h('text', { key: t, className: 'ax', x: PAD.l - 8, y: y(t) + 4, textAnchor: 'end' }, fmtMoney(t)))),
+    h('path', { d: path('cumCost'), fill: 'none', stroke: '#2c4a60', strokeWidth: 1.8, strokeDasharray: '5 4' }),
+    h('path', { d: path('cumGp'), fill: 'none', stroke: '#001628', strokeWidth: 2.2 }),
+    ...rows.map((r, i) => (i % step === 0) ? h('text', { key: r.key, className: 'ax', x: x(i), y: H - 10, textAnchor: 'middle' }, r.short) : null),
+    be ? h('g', null, h('circle', { cx: x(breakeven), cy: y(be.cumGp), r: 5, fill: '#fff', stroke: '#001628', strokeWidth: 2.2 }), h('text', { className: 'vl', x: x(breakeven), y: y(be.cumGp) - 11, textAnchor: breakeven > rows.length * 0.8 ? 'end' : 'middle', style: { fontWeight: 800 } }, 'Pays back ' + be.label))
+      : h('text', { className: 'vl', x: w - PAD.r, y: y(0) - 8, textAnchor: 'end', style: { fontWeight: 800 } }, 'Not paid back by ' + rows[rows.length - 1].label)));
+}
+
+/* ---------- plan table ---------- */
+const GROUPS = [
+  { id: 'people', label: 'People', rows: [
+    { k: 'hires', label: 'Hires', f: 'count', tip: 'Growth hires plus backfills joining this month.' },
+    { k: 'departures', label: 'Departures', f: 'count', tip: 'Reps expected to leave, from the attrition rate. Expected values, so they are rarely whole numbers.' },
+    { k: 'ramping', label: 'Ramping reps', f: 'count', tip: 'Reps still inside their ramp months.' },
+    { k: 'ramped', label: 'Ramped reps', f: 'count', tip: 'Reps past their ramp, selling at 100%.' },
+    { k: 'reps', label: 'Reps', f: 'count', b: true, tip: 'Everyone on the team. Quarters and years show the closing month.' },
+    { k: 'mgrs', label: 'Managers', f: 'int', tip: 'Reps divided by the span, rounded up.' },
+    { k: 'dirs', label: 'Directors', f: 'int', tip: 'Added once managers reach the director span.' } ] },
+  { id: 'bookings', label: 'Bookings', rows: [
+    { k: 'capacity', label: 'Selling capacity', f: 'count', tip: 'Ramped-equivalent reps: each rep counted at their ramp percentage. Wins are this times wins per rep.' },
+    { k: 'wins', label: 'Wins', f: 'count', tip: 'Closed-won deals.' },
+    { k: 'booked', label: 'Booked ARR', f: 'money', b: true, tip: 'Wins times ARPU. Gross, before book to live and churn.' } ] },
+  { id: 'revenue', label: 'Revenue', rows: [
+    { k: 'golives', label: 'Go-lives', f: 'count', tip: 'Wins that went live, after the time to go live.' },
+    { k: 'newLive', label: 'New live ARR', f: 'money', tip: 'Go-lives times ARPU. This is when revenue starts.' },
+    { k: 'churned', label: 'Churned ARR', f: 'money', neg: true, tip: 'Churn taken off the opening live ARR balance.' },
+    { k: 'endArr', label: 'Ending ARR', f: 'money', b: true, tip: 'Live ARR this team has produced, net of churn. The number to plan against.' } ] },
+  { id: 'cost', label: 'Cost', rows: [
+    { k: 'costRep', label: 'Reps', f: 'money', tip: 'Reps times OTE times the fully loaded multiplier, by month.' },
+    { k: 'costMgr', label: 'Managers', f: 'money', tip: 'Managers times OTE times the multiplier.' },
+    { k: 'costDir', label: 'Directors', f: 'money', tip: 'Directors times OTE times the multiplier.' },
+    { k: 'costOther', label: 'Other acquisition cost', f: 'money', tip: 'The other acquisition cost lines, on their bases.' },
+    { k: 'costTotal', label: 'Total cost', f: 'money', b: true, tip: 'Everything above. This is the CAC numerator.' } ] },
+  { id: 'unit', label: 'Unit economics', rows: [
+    { k: 'cac', label: 'CAC per go-live', f: 'moneyFull', tip: 'Total cost divided by go-lives in the same period. Early months run high because ramping reps cost money before they sell.' },
+    { k: 'payback', label: 'Payback (months)', f: 'mo', tip: 'CAC divided by monthly gross profit per go-live (ARPU times gross margin, over 12).' },
+    { k: 'cumCost', label: 'Cost to date', f: 'money', tip: 'Cumulative total cost from the first month.' },
+    { k: 'cumGp', label: 'Gross profit to date', f: 'money', tip: 'Cumulative gross profit on live ARR: ending ARR over 12, times gross margin, each month.' },
+    { k: 'cumNet', label: 'Net to date', f: 'money', b: true, signed: true, tip: 'Gross profit to date less cost to date. The team has paid for itself once this turns positive.' } ] },
+];
+function cellText(row, v) {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '-';
+  switch (row.f) {
+    case 'count': return fmtCount(v);
+    case 'int': return fmtInt(v);
+    case 'money': return (row.neg && v > 0 ? '-' : '') + fmtMoney(v);
+    case 'moneyFull': return fmtMoney(v, true);
+    case 'mo': return fmtMo(v);
+    default: return String(v);
+  }
+}
+function rawText(row, v) {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '';
+  if (row.f === 'money' || row.f === 'moneyFull') return String(Math.round(row.neg ? -v : v));
+  if (row.f === 'int') return String(Math.round(v));
+  return String(Math.round(v * 100) / 100);
+}
+function PlanTable({ rows, gm, view, setView, title }) {
+  const periods = useMemo(() => E.rollup(rows, view, gm), [rows, view, gm]);
+  const total = useMemo(() => E.totalColumn(rows, gm), [rows, gm]);
+  const cw = view === 'month' ? 92 : view === 'quarter' ? 100 : 112;
+  const copy = () => {
+    const lines = [['', ...periods.map(p => p.plabel), 'Total'].join('\t')];
+    for (const g of GROUPS) { lines.push(g.label); for (const r of g.rows) lines.push([r.label, ...periods.map(p => rawText(r, p[r.k])), rawText(r, total[r.k])].join('\t')); }
+    const text = lines.join('\n');
+    const done = () => toast('Copied ' + (lines.length - 1) + ' rows for Excel');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => fallback(text, done)); else fallback(text, done);
+  };
+  const fallback = (text, done) => { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Copy failed'); } document.body.removeChild(ta); };
+  return h('div', { className: 'plan' },
+    h('div', { className: 'spread', style: { background: 'var(--band)', borderRadius: 8, padding: '6px 10px', marginBottom: 8 } },
+      h('div', { className: 'section-title' }, title, Hint('Every number here is worked out from the assumptions. Flows add up across a quarter or year; counts and balances show the closing month; CAC and payback are recomputed for the period.')),
+      h('div', { style: { display: 'flex', gap: 8, alignItems: 'center' } },
+        h(Seg, { sm: true, value: view, onChange: setView, options: [{ id: 'month', label: 'Monthly' }, { id: 'quarter', label: 'Quarterly' }, { id: 'year', label: 'Annual' }] }),
+        Btn({ kind: 'primary', sm: true, onClick: copy, tip: 'Copies the table as tab-separated numbers. Paste straight into Excel, Sheets or the Business Review plan.' }, Icon('copy', 12), 'Copy for Excel'))),
+    h('div', { className: 'plan-wrap' },
+      h('table', { className: 'pt' },
+        h('colgroup', null, h('col', { style: { width: 210 } }), ...periods.map(p => h('col', { key: p.pkey, style: { width: cw } })), h('col', { style: { width: 116 } })),
+        h('thead', null, h('tr', null, h('th', { className: 'lc' }, ''), ...periods.map(p => h('th', { key: p.pkey, className: view === 'month' && p.cols[0].m === 1 ? 'yr' : '' }, p.plabel)), h('th', { className: 'tc' }, 'Total'))),
+        h('tbody', null, ...GROUPS.flatMap(g => [
+          h('tr', { key: g.id, className: 'g' }, h('td', { className: 'lc' }, g.label), ...periods.map(p => h('td', { key: p.pkey, className: view === 'month' && p.cols[0].m === 1 ? 'yr' : '' })), h('td', { className: 'tc' })),
+          ...g.rows.map(r => h('tr', { key: r.k, className: r.b ? 'b' : '' },
+            h('td', { className: 'lc' }, h('span', { className: 'rl' }, h('span', null, r.label), r.tip ? Hint(r.tip) : null)),
+            ...periods.map(p => { const v = p[r.k]; const t = cellText(r, v); return h('td', { key: p.pkey, className: (view === 'month' && p.cols[0].m === 1 ? 'yr ' : '') + (t === '-' ? 'dash' : (r.neg && v > 0) || (r.signed && v < 0) ? 'neg' : '') }, t); }),
+            (() => { const v = total[r.k]; const t = cellText(r, v); return h('td', { className: 'tc' + (t === '-' ? ' dash' : (r.neg && v > 0) || (r.signed && v < 0) ? ' neg' : '') }, t); })()))])))));
+}
+
+/* ---------- results ---------- */
+function Tiles({ s, company, endLabel }) {
+  const tile = (n, unit, label, tip) => h('div', { className: 'stat' }, h('div', { className: 'n' }, n, unit ? h('span', { className: 'u' }, unit) : null), h('div', { className: 'l' }, h('span', { className: 'klabel' }, label), Hint(tip)));
+  return h('div', { className: 'tiles' },
+    tile(fmtMoney(s.endArr), null, 'Ending ARR, ' + endLabel, 'Live ARR this plan has produced by the last month, net of churn. Gross bookings are the next tile.'),
+    tile(fmtMoney(s.cumBooked), null, 'Booked ARR, ' + company.months + ' months', 'Everything sold over the horizon, before book to live and churn.'),
+    tile(fmtMoney(s.cumCost), null, 'Total cost, ' + company.months + ' months', 'Reps, managers, directors and the other acquisition cost lines, added up over the horizon.'),
+    tile(s.blendedCac === null ? '-' : fmtMoney(s.blendedCac, true), null, 'CAC per go-live', 'Total cost over the horizon divided by go-lives over the horizon. Includes the ramp cost of everyone hired, which is why it sits above the full-strength CAC below.'),
+    tile(s.payback === null ? '-' : fmtMo(s.payback), s.payback === null ? null : plural(s.payback, 'month', 'months'), 'Payback', 'Blended CAC divided by monthly gross profit per go-live at ' + fmtPct(company.grossMargin) + ' gross margin.'),
+    tile(s.ltvCac === null ? '-' : fmtX(s.ltvCac), null, 'LTV to CAC', 'Lifetime value is ARPU times gross margin divided by annual churn' + (s.ltv !== null ? ' (' + fmtMoney(s.ltv, true) + ' here)' : '') + ', against the blended CAC. Above 3x is the usual bar.'));
+}
+function FullStrength({ s }) {
+  const f = s.full; const it = (b, l) => h('div', { className: 'fs-i' }, h('b', null, b), h('span', null, l));
+  return h('div', { className: 'fs' },
+    h('div', { className: 'fs-l' }, h('span', { className: 'klabel' }, 'At full strength'), Hint('The team at its cap, everyone ramped, in steady state. The unit economics to judge the model on before the ramp and hiring timing get involved.')),
+    it(fmtCount(f.reps) + ' ' + plural(f.reps, 'rep'), fmtInt(f.mgrs) + ' ' + plural(f.mgrs, 'manager') + ', ' + fmtInt(f.dirs) + ' ' + plural(f.dirs, 'director')),
+    it(fmtMoney(f.booked), 'booked ARR a month'),
+    it(fmtMoney(f.liveArr), 'goes live a month'),
+    it(fmtMoney(f.cost), 'cost a month'),
+    it(f.cac === null ? '-' : fmtMoney(f.cac, true), 'CAC per go-live'),
+    it(f.payback === null ? '-' : fmtMo(f.payback), plural(f.payback || 0, 'month', 'months') + ' payback'));
+}
+function Results({ run, company, view, setView, cap, title }) {
+  const { rows, summary: s } = run;
+  const last = rows[rows.length - 1];
+  const endLabel = last ? last.label : '';
+  const be = s.breakeven !== null && s.breakeven !== undefined ? rows[s.breakeven] : null;
+  return h('div', null,
+    h(Tiles, { s, company, endLabel }),
+    h(FullStrength, { s }),
+    h('div', { className: 'cards' },
+      h('div', { className: 'card full' },
+        h('div', { className: 'spread' }, h('div', { className: 'section-title' }, 'ARR bridge', Hint('How live ARR builds. Each bar pair is one period: what went live, then what churned. The last bar is where the plan lands.')),
+          h('div', { className: 'legend' }, h('span', { className: 'li' }, h('span', { className: 'sw', style: { background: '#8dd2d1' } }), 'New live ARR'), h('span', { className: 'li' }, h('span', { className: 'sw', style: { background: 'repeating-linear-gradient(45deg,#f2f6fa,#f2f6fa 2px,#2c4a60 2px,#2c4a60 3px)' } }), 'Churned'), h('span', { className: 'li' }, h('span', { className: 'sw', style: { background: '#001628' } }), 'Ending ARR'))),
+        h(BridgeChart, { rows, gm: company.grossMargin / 100, endLabel })),
+      h('div', { className: 'card' },
+        h('div', { className: 'spread' }, h('div', { className: 'section-title' }, 'Headcount', Hint('Reps on the team each month. Ramping reps cost the same as ramped ones and sell less, which is the whole reason hiring timing matters.')),
+          h('div', { className: 'legend' }, h('span', { className: 'li' }, h('span', { className: 'sw', style: { background: '#001628' } }), 'Ramped'), h('span', { className: 'li' }, h('span', { className: 'sw', style: { background: '#8dd2d1' } }), 'Ramping'))),
+        h(HeadcountChart, { rows, cap })),
+      h('div', { className: 'card' },
+        h('div', { className: 'spread' }, h('div', { className: 'section-title' }, 'Investment', Hint('Cumulative cost against cumulative gross profit on the live ARR. Where the solid line crosses the dashed one, the team has paid for itself.')),
+          h('div', { className: 'legend' }, h('span', { className: 'li' }, h('span', { className: 'sw ln dash' }), 'Cost to date'), h('span', { className: 'li' }, h('span', { className: 'sw ln deep' }), 'Gross profit to date'))),
+        h(InvestChart, { rows, breakeven: s.breakeven }))),
+    h(PlanTable, { rows, gm: company.grossMargin / 100, view, setView, title }));
+}
+
+/* ---------- app ---------- */
+function App() {
+  const [st, setSt] = useState(loadState);
+  const [modal, setModal] = useState(null);
+  const fileRef = useRef(null);
+  useEffect(() => { saveState(st); }, [st]);
+  const { company, teams, scope, view } = st;
+  const runs = useMemo(() => teams.map(t => E.runTeam(t, company)), [teams, company]);
+  const allRun = useMemo(() => E.combineRuns(runs, company), [runs, company]);
+  const team = teams.find(t => t.id === scope) || null;
+  const run = team ? runs[teams.indexOf(team)] : allRun;
+  const setCompany = c => setSt(s => ({ ...s, company: c }));
+  const setTeam = t => setSt(s => ({ ...s, teams: s.teams.map(x => x.id === t.id ? t : x) }));
+  const setScope = id => setSt(s => ({ ...s, scope: id }));
+  const setView = v => setSt(s => ({ ...s, view: v }));
+  const addTeam = () => { const n = E.defaultTeam('Team ' + (teams.length + 1)); setSt(s => ({ ...s, teams: s.teams.concat([n]), scope: n.id })); };
+  const duplicate = () => { if (!team) return; const n = { ...JSON.parse(JSON.stringify(team)), id: E.uid(), name: team.name + ' copy', otherCost: team.otherCost.map(l => ({ ...l, id: E.uid() })) }; setSt(s => ({ ...s, teams: s.teams.concat([n]), scope: n.id })); toast('Duplicated ' + team.name); };
+  const removeTeam = () => { if (!team) return; setModal({ title: 'Remove ' + (team.name || 'this team') + '?', body: 'Its assumptions go with it. Nothing else changes.', confirmLabel: 'Remove team', danger: true, onConfirm: () => { setSt(s => { const rest = s.teams.filter(x => x.id !== team.id); return { ...s, teams: rest, scope: rest.length ? rest[0].id : 'all' }; }); setModal(null); toast('Removed ' + team.name); } }); };
+  const resetAll = () => setModal({ title: 'Reset the model?', body: 'Every team and setting goes back to the defaults. Export first if you want to keep this version.', confirmLabel: 'Reset', danger: true, onConfirm: () => { setSt(freshState()); setModal(null); toast('Reset to defaults'); } });
+  const exportJson = () => { const blob = new Blob([JSON.stringify({ v: 1, company, teams }, null, 2)], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'revenue-model-' + new Date().toISOString().slice(0, 10) + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); toast('Exported'); };
+  const importJson = e => { const f = e.target.files && e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { try { const d = JSON.parse(rd.result); if (!d.company || !Array.isArray(d.teams)) throw new Error('shape'); setSt(s => ({ ...s, company: d.company, teams: d.teams, scope: d.teams[0] ? d.teams[0].id : 'all' })); toast('Imported ' + d.teams.length + ' ' + plural(d.teams.length, 'team')); } catch (x) { toast('That file is not a revenue model export'); } }; rd.readAsText(f); e.target.value = ''; };
+
+  const scopeOptions = (teams.length > 1 ? [{ id: 'all', label: 'All teams' }] : []).concat(teams.map(t => ({ id: t.id, label: t.name || 'Untitled team' })));
+  const title = team ? (team.name || 'Untitled team') + ' plan' : 'All teams plan';
+
+  return h(React.Fragment, null,
+    h('div', { className: 'tb' },
+      h('div', { className: 'tb-brand' }, h(Mark), 'Cirri'),
+      h('div', { className: 'tb-tabs' }, h('button', { type: 'button', className: 'tb-tab on' }, 'Revenue model')),
+      h('span', { className: 'pill-s demo' }, 'Prototype'),
+      h('div', { className: 'tb-r' },
+        Btn({ onClick: exportJson, tip: 'Download the assumptions as a JSON file.' }, Icon('download', 13), 'Export'),
+        Btn({ onClick: () => fileRef.current && fileRef.current.click(), tip: 'Load assumptions from an exported file.' }, Icon('upload', 13), 'Import'),
+        h('input', { ref: fileRef, type: 'file', accept: 'application/json,.json', style: { display: 'none' }, onChange: importJson }),
+        Btn({ onClick: resetAll }, Icon('reset', 13), 'Reset'))),
+    h('div', { className: 'page' },
+      h('div', { className: 'ph' },
+        h('h1', null, 'Revenue model', Hint('A bottoms-up sales capacity model. Put in how the team is hired, ramped, paid and how it sells; the plan, the ARR it produces and the CAC and payback are worked out from that. Nothing in the results is typed.', true)),
+        h('div', { className: 'ph-r' }, scopeOptions.length ? h(Seg, { value: scope, options: scopeOptions, onChange: setScope }) : null, Btn({ onClick: addTeam }, Icon('plus', 13), 'Add team'))),
+      h('div', { className: 'layout' },
+        h('div', { className: 'aside' },
+          h(CompanyPanel, { company, setCompany }),
+          team ? h(TeamPanel, { team, company, setTeam, onDuplicate: duplicate, onRemove: removeTeam }) : h(TeamsList, { teams, runs, onOpen: setScope, onAdd: addTeam })),
+        teams.length ? h(Results, { run, company, view, setView, cap: team ? team.cap : allRun.summary.full.reps, title })
+          : h('div', { className: 'card' }, h('div', { className: 'empty' }, 'Add a team to see the plan.')))),
+    modal ? h(Modal, { ...modal, onClose: () => setModal(null) }) : null);
+}
+ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+})();
+</script>
+</body>
+</html>
